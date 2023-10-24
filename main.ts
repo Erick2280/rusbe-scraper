@@ -10,7 +10,7 @@ const RESTAURANT_TIME_ZONE = 'America/Recife';
 const OPERATION_DATE_FORMAT = 'dd/MM';
 const MEAL_TIME_FORMAT_FULL = `H'h'mm`;
 const MEAL_TIME_FORMAT_SHORT = `H'h'`;
-const PUBLIC_JSON_PATH = './archive/days';
+const TARGET_JSON_DIRECTORY_PATH = './archive/days';
 const CURRENT_SCRAPER_VERSION = 'rusbe-scraper: v1';
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Fetching ${PAGE_URL}`)
@@ -133,6 +133,8 @@ for (const section of operationDaySections) {
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Scraping finished, ${operationDays.length} days found`);
 
+createTargetDirectory()
+
 for (const operationDay of operationDays) {
     saveScrapingOutput(operationDay);
 }
@@ -148,8 +150,12 @@ function parseMealTimeString(time: string, referenceDate: Date): Date {
     return parsedTimeAsFullFormat;
 }
 
+function createTargetDirectory() {
+    Deno.mkdirSync(TARGET_JSON_DIRECTORY_PATH, { recursive: true });
+}
+
 function saveScrapingOutput(operationDay: OperationDay) {
-    const scrapingResultFilePath = `${PUBLIC_JSON_PATH}/${format(operationDay.date, 'dd-MM-yyyy')}.json`;
+    const scrapingResultFilePath = `${TARGET_JSON_DIRECTORY_PATH}/${format(operationDay.date, 'dd-MM-yyyy')}.json`;
     const scrapingResult: ScrapingResult = {
         operationDay,
         lastUpdatedAt: new Date(),
