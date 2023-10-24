@@ -10,7 +10,7 @@ const RESTAURANT_TIME_ZONE = 'America/Recife';
 const OPERATION_DATE_FORMAT = 'dd/MM';
 const MEAL_TIME_FORMAT_FULL = `H'h'mm`;
 const MEAL_TIME_FORMAT_SHORT = `H'h'`;
-const TARGET_JSON_DIRECTORY_PATH = './archive/days';
+const TARGET_JSON_DIRECTORY_PATH = './dist/days';
 const CURRENT_SCRAPER_VERSION = 'rusbe-scraper: v1';
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Fetching ${PAGE_URL}`)

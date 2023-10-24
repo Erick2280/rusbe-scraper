@@ -1,0 +1,32 @@
+name: scrape
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3,8-18,19-23 * * 1-5'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Use Deno v1.x
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Run script
+      run: |
+        deno task start
+      env:
+        CI: true
+
+    - name: Publish files to archive
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+          publish_dir: ./dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: archive

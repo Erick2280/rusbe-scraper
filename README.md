@@ -1,4 +1,4 @@
-# ![Rusbé Scraper](/archive/assets/logo.svg)
+# ![Rusbé Scraper](/assets/logo.svg)
 Ferramenta de raspagem de dados do Restaurante Universitário da UFPE.
 
 ![Build status](https://github.com/Erick2280/rusbe-scraper/workflows/build/badge.svg)
@@ -19,7 +19,7 @@ Para executar o script, execute no terminal o seguinte:
 
 ```
 
-O script se conectará à página do Restaurante Universitário, e caso haja dados novos, atualizará os arquivos JSON na pasta `/archive/days`.
+O script se conectará à página do Restaurante Universitário, e caso haja dados novos, atualizará os arquivos JSON na pasta `/dist/days`.
 
 Caso deseje que o script reinicie automaticamente em caso de alteração no código-fonte, execute no terminal o seguinte:
 
