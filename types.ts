@@ -1,13 +1,11 @@
-export interface ScrapingResult {
-    operationDay: OperationDay
-    lastUpdatedAt: Date;
-    scraperVersionIdentifier: 'rusbe-scraper: v1';
+export interface MealItem {
+    name: string;
+    notes: string[]
 }
 
-export interface OperationDay {
-    date: Date;
-    meals: Meal[];
-    note?: string;
+export interface MealSet {
+    name: string;
+    items: MealItem[];
 }
 
 export enum MealType {
@@ -23,12 +21,21 @@ export interface Meal {
     sets: MealSet[];
 }
 
-export interface MealSet {
-    name: string;
-    items: MealItem[];
+export interface OperationDay {
+    date: Date;
+    meals: Meal[];
+    note?: string;
 }
 
-export interface MealItem {
-    name: string;
-    notes: string[]
+export interface ScrapingResult {
+    operationDay: OperationDay
+    lastUpdatedAt: Date;
+    scraperVersionIdentifier: 'rusbe-scraper: v1';
 }
+
+export interface ScrapedFileEntry {
+    title: string;
+    url: string;
+}
+
+export type ScrapedFilesIndex = ScrapedFileEntry[];

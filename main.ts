@@ -3,14 +3,16 @@ import { parse, format } from 'npm:date-fns@2.30.0';
 import { zonedTimeToUtc } from 'npm:date-fns-tz@2.0.0';
 import superjson from 'npm:superjson@2.1.0';
 
-import { Meal, MealItem, MealSet, MealType, OperationDay, ScrapingResult } from "./types.ts";
+import { Meal, MealItem, MealSet, MealType, OperationDay, ScrapedFileEntry, ScrapedFilesIndex, ScrapingResult } from "./types.ts";
 
 const PAGE_URL = 'https://www.ufpe.br/restaurante';
+const ARCHIVE_URL = 'https://archive.rusbe.riso.dev';
 const RESTAURANT_TIME_ZONE = 'America/Recife';
 const OPERATION_DATE_FORMAT = 'dd/MM';
 const MEAL_TIME_FORMAT_FULL = `H'h'mm`;
 const MEAL_TIME_FORMAT_SHORT = `H'h'`;
-const TARGET_JSON_DIRECTORY_PATH = './dist/days';
+const OUTPUT_ROOT_DIRECTORY_PATH = './dist';
+const SCRAPING_RESULT_JSON_DIRECTORY_PATH = `days`;
 const CURRENT_SCRAPER_VERSION = 'rusbe-scraper: v1';
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Fetching ${PAGE_URL}`)
@@ -139,6 +141,8 @@ for (const operationDay of operationDays) {
     saveScrapingOutput(operationDay);
 }
 
+createIndexFile();
+
 function parseMealTimeString(time: string, referenceDate: Date): Date {
     const tentativeParsedTimeAsShortFormat = parse(time, MEAL_TIME_FORMAT_SHORT, referenceDate);
 
@@ -151,11 +155,11 @@ function parseMealTimeString(time: string, referenceDate: Date): Date {
 }
 
 function createTargetDirectory() {
-    Deno.mkdirSync(TARGET_JSON_DIRECTORY_PATH, { recursive: true });
+    Deno.mkdirSync(`${OUTPUT_ROOT_DIRECTORY_PATH}/${SCRAPING_RESULT_JSON_DIRECTORY_PATH}`, { recursive: true });
 }
 
 function saveScrapingOutput(operationDay: OperationDay) {
-    const scrapingResultFilePath = `${TARGET_JSON_DIRECTORY_PATH}/${format(operationDay.date, 'dd-MM-yyyy')}.json`;
+    const scrapingResultFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/${SCRAPING_RESULT_JSON_DIRECTORY_PATH}/${format(operationDay.date, 'dd-MM-yyyy')}.json`;
     const scrapingResult: ScrapingResult = {
         operationDay,
         lastUpdatedAt: new Date(),
@@ -179,4 +183,25 @@ function saveScrapingOutput(operationDay: OperationDay) {
     const scrapingResultPayload = superjson.stringify(scrapingResult);
     console.log(`${CURRENT_SCRAPER_VERSION} - Saving ${scrapingResultFilePath}`)
     Deno.writeTextFileSync(scrapingResultFilePath, scrapingResultPayload);
+}
+
+function createIndexFile() {
+    const indexFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/index.json`;
+    const scrapedFilesIndex: ScrapedFilesIndex = [];
+
+    for (const entry of Deno.readDirSync(`${OUTPUT_ROOT_DIRECTORY_PATH}/${SCRAPING_RESULT_JSON_DIRECTORY_PATH}`)) {
+        if (entry.isFile && entry.name.endsWith('.json')) {
+            const title = entry.name.replace('.json', '')
+            const scrapedFileEntry: ScrapedFileEntry = {
+                title,
+                url: `${ARCHIVE_URL}/${SCRAPING_RESULT_JSON_DIRECTORY_PATH}/${entry.name}`
+            }
+
+            scrapedFilesIndex.push(scrapedFileEntry);
+        }
+    }
+
+    const indexPayload = superjson.stringify(scrapedFilesIndex);
+    console.log(`${CURRENT_SCRAPER_VERSION} - Saving index file`)
+    Deno.writeTextFileSync(indexFilePath, indexPayload);
 }
