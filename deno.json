@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts",
+    "start": "deno run --allow-net=www.ufpe.br --allow-write --allow-read main.ts"
+  }
+}

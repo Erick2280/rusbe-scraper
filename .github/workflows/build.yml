@@ -1,0 +1,25 @@
+name: build
+
+on:
+  push:
+  pull_request:
+    branches: [ develop, release ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Use Deno v1.x
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Run script
+      run: |
+        deno task start
+      env:
+        CI: true
