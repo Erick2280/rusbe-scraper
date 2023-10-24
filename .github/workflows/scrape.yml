@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 3,8-18,19-23 * * 1-5'
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
