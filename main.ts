@@ -84,7 +84,7 @@ for (const section of operationDaySections) {
                                 strippedMealString = strippedMealString.replace(note, '');
                             }
                             return {
-                                name: strippedMealString.trim(),
+                                name: capitalizeFirstLetter(strippedMealString.trim()),
                                 notes: notes.map(note =>
                                     note.trim()
                                         .replace('(', '')
@@ -142,6 +142,12 @@ for (const operationDay of operationDays) {
 }
 
 createIndexFile();
+
+function capitalizeFirstLetter(stringValue: string) {
+    if (stringValue.length === 0) return stringValue;
+    return stringValue[0].toUpperCase() + stringValue.slice(1);
+}
+
 
 function parseMealTimeString(time: string, referenceDate: Date): Date {
     const tentativeParsedTimeAsShortFormat = parse(time, MEAL_TIME_FORMAT_SHORT, referenceDate);
