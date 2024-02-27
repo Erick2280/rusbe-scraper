@@ -92,7 +92,7 @@ for (const section of operationDaySections) {
                             };
                         } else {
                             return {
-                                name: mealString.trim(),
+                                name: capitalizeFirstLetter(mealString.trim()),
                                 notes: []
                             }
                         }
