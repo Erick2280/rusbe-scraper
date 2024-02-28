@@ -4,9 +4,8 @@
     "specifiers": {
       "npm:cheerio@1.0.0-rc.12": "npm:cheerio@1.0.0-rc.12",
       "npm:date-fns-tz@2.0.0": "npm:date-fns-tz@2.0.0_date-fns@2.30.0",
-      "npm:date-fns@2.30.0": "npm:date-fns@2.30.0",
-      "npm:superagent@8.1.2": "npm:superagent@8.1.2",
-      "npm:superjson@2.1.0": "npm:superjson@2.1.0"
+      "npm:date-fns@3.3.1": "npm:date-fns@3.3.1",
+      "npm:superjson@2.2.1": "npm:superjson@2.2.1"
     },
     "npm": {
       "@babel/runtime@7.23.1": {
@@ -103,6 +102,10 @@
         "dependencies": {
           "@babel/runtime": "@babel/runtime@7.23.1"
         }
+      },
+      "date-fns@3.3.1": {
+        "integrity": "sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==",
+        "dependencies": {}
       },
       "debug@4.3.4": {
         "integrity": "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==",
@@ -343,6 +346,12 @@
       },
       "superjson@2.1.0": {
         "integrity": "sha512-VrMxSzMeE2nLmTvxOl0gEuz45kErw5oNNIzmZJ+eCmtSO89sUzRIIOhATJOdkSOn4eChekU835RtmPqp33S7JQ==",
+        "dependencies": {
+          "copy-anything": "copy-anything@3.0.5"
+        }
+      },
+      "superjson@2.2.1": {
+        "integrity": "sha512-8iGv75BYOa0xRJHK5vRLEjE2H/i4lulTjzpUXic3Eg8akftYjkmQDa8JARQ42rlczXyFR3IeRoeFCc7RxHsYZA==",
         "dependencies": {
           "copy-anything": "copy-anything@3.0.5"
         }
