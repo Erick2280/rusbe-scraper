@@ -33,7 +33,24 @@ for (const section of operationDaySections) {
     const sectionTitle = page(`span[role="tab"][aria-controls="${sectionId}"]`).text().trim();
     
     const [sectionDay, note] = sectionTitle.split('-').map(text => text.trim());
-    const [_weekDay, dateString] = sectionDay.split(' ').map(text => text.trim());
+    const [_weekDay, dateString] = (() => {
+        const splittedSectionDay = sectionDay.split(' ').map(text => text.trim());
+        
+        if (splittedSectionDay.length >= 2) {
+            return splittedSectionDay
+        }
+        
+        const possibleWeekDayNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        const weekDay = possibleWeekDayNames.find(weekDay => sectionDay.includes(weekDay));
+        if (weekDay) {
+            const date = sectionDay.replace(weekDay, '').trim();
+            return [weekDay, date];
+        }
+
+        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse week day from ${sectionDay}`)
+        return ['', sectionDay];
+    })()
+
     const date = zonedTimeToUtc(parse(dateString, OPERATION_DATE_FORMAT, new Date()), RESTAURANT_TIMEZONE);
 
     console.log(`${CURRENT_SCRAPER_VERSION} - Scraping ${format(date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)}`);
