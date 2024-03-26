@@ -1,20 +1,13 @@
 import * as cheerio from 'npm:cheerio@1.0.0-rc.12';
 import { parse, format } from 'npm:date-fns@3.3.1';
 import { zonedTimeToUtc } from 'npm:date-fns-tz@2.0.0';
-import superjson from 'npm:superjson@2.2.1';
 
-import { Meal, MealItem, MealSet, MealType, OperationDay, ArchiveFileEntry, ArchiveIndex, ArchiveEntry } from './types/v2.ts';
+import { CURRENT_SCRAPER_VERSION, OPERATION_DATE_FORMAT, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT, RESTAURANT_TIMEZONE } from './constants.ts';
+import { Meal, MealItem, MealSet, MealType, OperationDay } from './types/v2.ts';
+import { capitalizeFirstLetter, parseMealTimeString } from './utils.ts';
+import { saveScrapingOutput } from './file-management.ts';
 
-const PAGE_URL = 'https://www.ufpe.br/restaurante';
-const ARCHIVE_URL = 'https://archive.rusbe.riso.dev';
-const RESTAURANT_TIMEZONE = 'America/Recife';
-const OPERATION_DATE_FORMAT = 'dd/MM';
-const MEAL_TIME_FORMAT_FULL = `H'h'mm`;
-const MEAL_TIME_FORMAT_SHORT = `H'h'`;
-const ARCHIVE_ENTRY_FILENAME_DATE_FORMAT = 'yyyy-MM-dd';
-const OUTPUT_ROOT_DIRECTORY_PATH = './dist';
-const ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH = `days`;
-const CURRENT_SCRAPER_VERSION = 'rusbe-scraper: v2';
+export const PAGE_URL = 'https://www.ufpe.br/restaurante';
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Fetching ${PAGE_URL}`)
 
@@ -153,81 +146,4 @@ for (const section of operationDaySections) {
 
 console.log(`${CURRENT_SCRAPER_VERSION} - Scraping finished, ${operationDays.length} days found`);
 
-createTargetDirectory()
-
-for (const operationDay of operationDays) {
-    saveScrapingOutput(operationDay);
-}
-
-createIndexFile();
-
-function capitalizeFirstLetter(stringValue: string) {
-    if (stringValue.length === 0) return stringValue;
-    return stringValue[0].toUpperCase() + stringValue.slice(1);
-}
-
-
-function parseMealTimeString(time: string, referenceDate: Date): Date {
-    const tentativeParsedTimeAsShortFormat = parse(time, MEAL_TIME_FORMAT_SHORT, referenceDate);
-
-    if (!isNaN(tentativeParsedTimeAsShortFormat.getTime())) {
-        return zonedTimeToUtc(tentativeParsedTimeAsShortFormat, RESTAURANT_TIMEZONE);
-    }
-
-    const parsedTimeAsFullFormat = parse(time, MEAL_TIME_FORMAT_FULL, referenceDate);
-    return zonedTimeToUtc(parsedTimeAsFullFormat, RESTAURANT_TIMEZONE);
-}
-
-function createTargetDirectory() {
-    Deno.mkdirSync(`${OUTPUT_ROOT_DIRECTORY_PATH}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}`, { recursive: true });
-}
-
-function saveScrapingOutput(operationDay: OperationDay) {
-    const archiveEntryFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}/${format(operationDay.date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)}.json`;
-    const archiveEntry: ArchiveEntry = {
-        operationDay,
-        lastUpdatedAt: new Date(),
-        scraperVersionIdentifier: CURRENT_SCRAPER_VERSION
-    }
-
-    try {
-        const existingArchiveEntryPayload = Deno.readTextFileSync(archiveEntryFilePath);
-        const existingArchiveEntry: ArchiveEntry = superjson.parse(existingArchiveEntryPayload);
-
-        if (superjson.stringify(existingArchiveEntry.operationDay) === superjson.stringify(archiveEntry.operationDay)) {
-            // The file already exists and the payload is the same, so it won't be updated
-            console.log(`${CURRENT_SCRAPER_VERSION} - Skipping ${archiveEntryFilePath} because it is already up-to-date`)
-            return;
-        }
-
-    } catch (_error) {
-        // The file does not exist, so it will be created
-    }
-
-    const archiveEntryPayload = superjson.stringify(archiveEntry);
-    console.log(`${CURRENT_SCRAPER_VERSION} - Saving ${archiveEntryFilePath}`)
-    Deno.writeTextFileSync(archiveEntryFilePath, archiveEntryPayload);
-}
-
-function createIndexFile() {
-    const indexFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/index.json`;
-    const archiveIndex: ArchiveIndex = [];
-
-    for (const entry of Deno.readDirSync(`${OUTPUT_ROOT_DIRECTORY_PATH}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}`)) {
-        if (entry.isFile && entry.name.endsWith('.json')) {
-            const title = entry.name.replace('.json', '')
-            const archiveFileEntry: ArchiveFileEntry = {
-                title,
-                url: `${ARCHIVE_URL}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}/${entry.name}`
-            }
-
-            archiveIndex.push(archiveFileEntry);
-        }
-    }
-
-    archiveIndex.sort((a, b) => a.title.localeCompare(b.title));
-
-    const indexPayload = superjson.stringify(archiveIndex);
-    console.log(`${CURRENT_SCRAPER_VERSION} - Saving index file`)
-    Deno.writeTextFileSync(indexFilePath, indexPayload);
-}
+saveScrapingOutput(operationDays);
