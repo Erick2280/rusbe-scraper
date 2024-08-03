@@ -1,10 +1,9 @@
 import * as cheerio from 'npm:cheerio@1.0.0-rc.12';
-import { parse, format } from 'npm:date-fns@3.3.1';
-import { zonedTimeToUtc } from 'npm:date-fns-tz@2.0.0';
+import { format } from 'npm:date-fns@3.3.1';
 
-import { CURRENT_SCRAPER_VERSION, OPERATION_DATE_FORMAT, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT, RESTAURANT_TIMEZONE } from './constants.ts';
+import { CURRENT_SCRAPER_VERSION, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT, WEEKDAY_NAMES } from './constants.ts';
 import { Meal, MealItem, MealSet, MealType, OperationDay } from './types/v2.ts';
-import { capitalizeFirstLetter, parseMealTimeString } from './utils.ts';
+import { capitalizeFirstLetter, parseMealDateString, parseMealTimeString } from './utils.ts';
 import { saveScrapingOutput } from './file-management.ts';
 
 export const PAGE_URL = 'https://www.ufpe.br/restaurante';
@@ -25,26 +24,32 @@ for (const section of operationDaySections) {
     const sectionId = page(section).attr('id');
     const sectionTitle = page(`span[role="tab"][aria-controls="${sectionId}"]`).text().trim();
     
-    const [sectionDay, note] = sectionTitle.split('-').map(text => text.trim());
+    const note = '' // FIXME: temporary disable note parsing
+
+    const sectionDay = sectionTitle.trim();
     const [_weekDay, dateString] = (() => {
-        const splittedSectionDay = sectionDay.split(' ').map(text => text.trim());
+        const splittedSectionDay = sectionDay.split('-').map(text => text.trim());
         
         if (splittedSectionDay.length >= 2) {
             return splittedSectionDay
         }
         
-        const possibleWeekDayNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
-        const weekDay = possibleWeekDayNames.find(weekDay => sectionDay.includes(weekDay));
+        const weekDay = WEEKDAY_NAMES.find(weekDay => sectionDay.includes(weekDay));
         if (weekDay) {
             const date = sectionDay.replace(weekDay, '').trim();
             return [weekDay, date];
         }
 
-        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse week day from ${sectionDay}`)
+        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse week day from ${sectionTitle}`)
         return ['', sectionDay];
     })()
 
-    const date = zonedTimeToUtc(parse(dateString, OPERATION_DATE_FORMAT, new Date()), RESTAURANT_TIMEZONE);
+    const date = parseMealDateString(dateString);
+
+    if (isNaN(date.getTime())) {
+        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse date from ${dateString}`);
+        continue;
+    }
 
     console.log(`${CURRENT_SCRAPER_VERSION} - Scraping ${format(date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)}`);
 
@@ -80,10 +85,12 @@ for (const section of operationDaySections) {
                     name: mealSetName,
                     items: []
                 };
-
-                const mealSetItems = page('li', cell);
+                const mealSetItems = cell.children;
                 for (const item of mealSetItems) {
                     const mealString = page(item).text().trim().normalize('NFKD');
+                    if (mealString === '') {
+                        continue;
+                    }
                     const dividedMealStrings = mealString.split(' ou ');
 
                     const mealItems: MealItem[] = dividedMealStrings.map(mealString => {

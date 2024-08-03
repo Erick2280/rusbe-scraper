@@ -1,9 +1,11 @@
 export const ARCHIVE_URL = 'https://archive.rusbe.riso.dev';
 export const RESTAURANT_TIMEZONE = 'America/Recife';
-export const OPERATION_DATE_FORMAT = 'dd/MM';
+export const OPERATION_DATE_FORMAT_SHORT = 'dd/MM';
+export const OPERATION_DATE_FORMAT_FULL = 'dd/MM/yyyy';
 export const MEAL_TIME_FORMAT_FULL = `H'h'mm`;
 export const MEAL_TIME_FORMAT_SHORT = `H'h'`;
 export const ARCHIVE_ENTRY_FILENAME_DATE_FORMAT = 'yyyy-MM-dd';
 export const OUTPUT_ROOT_DIRECTORY_PATH = './dist';
 export const ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH = `days`;
 export const CURRENT_SCRAPER_VERSION = 'rusbe-scraper: v2';
+export const WEEKDAY_NAMES: readonly string[] = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
