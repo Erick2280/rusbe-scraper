@@ -1,6 +1,6 @@
-import { parse } from 'npm:date-fns@3.3.1';
+import { parse, format } from 'npm:date-fns@3.3.1';
 import { zonedTimeToUtc } from 'npm:date-fns-tz@2.0.0';
-import { MEAL_TIME_FORMAT_FULL, MEAL_TIME_FORMAT_SHORT, OPERATION_DATE_FORMAT_SHORT, OPERATION_DATE_FORMAT_FULL, RESTAURANT_TIMEZONE } from './constants.ts';
+import { MEAL_TIME_FORMAT_FULL, MEAL_TIME_FORMAT_SHORT, OPERATION_DATE_FORMAT_SHORT, OPERATION_DATE_FORMAT_FULL, RESTAURANT_TIMEZONE, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT } from './constants.ts';
 
 export function capitalizeFirstLetter(stringValue: string) {
     if (stringValue.length === 0) return stringValue;
@@ -27,4 +27,8 @@ export function parseMealDateString(date: string): Date {
 
     const parsedDateAsFullFormat = parse(date, OPERATION_DATE_FORMAT_FULL, new Date());
     return zonedTimeToUtc(parsedDateAsFullFormat, RESTAURANT_TIMEZONE);
+}
+
+export function getArchiveEntryFilenameDateFormatString(date: Date): string {
+    return format(date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)
 }

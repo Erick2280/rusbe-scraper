@@ -1,8 +1,8 @@
 import superjson from 'npm:superjson@2.2.1';
-import { format } from 'npm:date-fns@3.3.1';
 
 import { ArchiveFileEntry, ArchiveIndex, ArchiveEntry, OperationDay } from './types/v2.ts';
-import { CURRENT_SCRAPER_VERSION, OUTPUT_ROOT_DIRECTORY_PATH, ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH, ARCHIVE_URL, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT } from './constants.ts';
+import { CURRENT_SCRAPER_VERSION, OUTPUT_ROOT_DIRECTORY_PATH, ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH, ARCHIVE_URL } from './constants.ts';
+import { getArchiveEntryFilenameDateFormatString } from './utils.ts';
 
 export function saveScrapingOutput(operationDays: OperationDay[]) {
     createTargetDirectory();
@@ -19,7 +19,7 @@ function createTargetDirectory() {
 }
 
 function createArchiveEntryFile(operationDay: OperationDay) {
-    const archiveEntryFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}/${format(operationDay.date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)}.json`;
+    const archiveEntryFilePath = `${OUTPUT_ROOT_DIRECTORY_PATH}/${ARCHIVE_ENTRY_JSON_FILES_DIRECTORY_PATH}/${getArchiveEntryFilenameDateFormatString(operationDay.date)}.json`;
     const archiveEntry: ArchiveEntry = {
         operationDay,
         lastUpdatedAt: new Date(),

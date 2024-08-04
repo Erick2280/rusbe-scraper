@@ -1,9 +1,8 @@
 import * as cheerio from 'npm:cheerio@1.0.0-rc.12';
-import { format } from 'npm:date-fns@3.3.1';
 
-import { CURRENT_SCRAPER_VERSION, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT, WEEKDAY_NAMES } from './constants.ts';
+import { CURRENT_SCRAPER_VERSION, WEEKDAY_NAMES } from './constants.ts';
 import { Meal, MealItem, MealSet, MealType, OperationDay } from './types/v2.ts';
-import { capitalizeFirstLetter, parseMealDateString, parseMealTimeString } from './utils.ts';
+import { capitalizeFirstLetter, getArchiveEntryFilenameDateFormatString, parseMealDateString, parseMealTimeString } from './utils.ts';
 import { saveScrapingOutput } from './file-management.ts';
 
 export const PAGE_URL = 'https://www.ufpe.br/restaurante';
@@ -51,7 +50,7 @@ for (const section of operationDaySections) {
         continue;
     }
 
-    console.log(`${CURRENT_SCRAPER_VERSION} - Scraping ${format(date, ARCHIVE_ENTRY_FILENAME_DATE_FORMAT)}`);
+    console.log(`${CURRENT_SCRAPER_VERSION} - Scraping ${getArchiveEntryFilenameDateFormatString(date)}`);
 
     const operationDay: OperationDay = {
         date,
