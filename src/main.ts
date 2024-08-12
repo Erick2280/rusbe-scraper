@@ -1,4 +1,6 @@
 import * as cheerio from 'npm:cheerio@1.0.0-rc.12';
+// @deno-types="npm:@types/luxon@3"
+import { DateTime } from 'npm:luxon@3.5.0';
 
 import { CURRENT_SCRAPER_VERSION, WEEKDAY_NAMES } from './constants.ts';
 import { Meal, MealItem, MealSet, MealType, OperationDay } from './types/v2.ts';
@@ -43,17 +45,19 @@ for (const section of operationDaySections) {
         return ['', sectionDay];
     })()
 
-    const date = parseMealDateString(dateString);
+    let date: DateTime<true>;
 
-    if (isNaN(date.getTime())) {
-        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse date from ${dateString}`);
+    try {
+        date = parseMealDateString(dateString)
+    } catch (e) {
+        console.log(`${CURRENT_SCRAPER_VERSION} - Could not parse date from ${dateString}, ${e}`);
         continue;
     }
 
     console.log(`${CURRENT_SCRAPER_VERSION} - Scraping ${getArchiveEntryFilenameDateFormatString(date)}`);
 
     const operationDay: OperationDay = {
-        date,
+        date: date.toJSDate(),
         meals: [],
         note
     }
@@ -128,14 +132,20 @@ for (const section of operationDaySections) {
                     const [mealType, mealTime] = page(cell).text().split('-').map(text => text.trim());
                     const [startTime, endTime] = mealTime.split('às').map(text => text.trim());
     
-                    const meal: Meal = {
-                        type: mealType as MealType,
-                        startTime: parseMealTimeString(startTime, operationDay.date),
-                        endTime: parseMealTimeString(endTime, operationDay.date),
-                        sets: []
-                    };
+                    let meal: Meal;
 
-                    indexedMeals.push({ meal, index });
+                    try {
+                        meal = {
+                            type: mealType as MealType,
+                            startTime: parseMealTimeString(startTime, date).toJSDate(),
+                            endTime: parseMealTimeString(endTime, date).toJSDate(),
+                            sets: []
+                        };
+
+                        indexedMeals.push({ meal, index });
+                    } catch (e) {
+                        console.log(`${CURRENT_SCRAPER_VERSION} - Cannot scrape meal for ${dateString}, ${e}`);
+                    }
                 }
             }
         }
